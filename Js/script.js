@@ -2,64 +2,65 @@
 
 
 // Cargar el SVG y animar los corazones
-fetch('Img/treelove.svg')
-  .then(res => res.text())
-  .then(svgText => {
-    const container = document.getElementById('tree-container');
-    container.innerHTML = svgText;
-    const svg = container.querySelector('svg');
-    if (!svg) return;
+// Carga y anima el árbol. Se dispara al comenzar la experiencia.
+function cargarArbol() {
+  fetch('Img/treelove.svg')
+    .then(res => res.text())
+    .then(svgText => {
+      const container = document.getElementById('tree-container');
+      container.innerHTML = svgText;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
 
-    // Animación de "dibujo" para todos los paths
-    const allPaths = Array.from(svg.querySelectorAll('path'));
-    allPaths.forEach(path => {
-      path.style.stroke = '#222';
-      path.style.strokeWidth = '2.5';
-      path.style.fillOpacity = '0';
-      const length = path.getTotalLength();
-      path.style.strokeDasharray = length;
-      path.style.strokeDashoffset = length;
-      path.style.transition = 'none';
-    });
-
-    // Forzar reflow y luego animar
-    setTimeout(() => {
-      allPaths.forEach((path, i) => {
-        path.style.transition = `stroke-dashoffset 1.2s cubic-bezier(.77,0,.18,1) ${i * 0.08}s, fill-opacity 0.5s ${0.9 + i * 0.08}s`;
-        path.style.strokeDashoffset = 0;
-        setTimeout(() => {
-          path.style.fillOpacity = '1';
-          path.style.stroke = '';
-          path.style.strokeWidth = '';
-        }, 1200 + i * 80);
+      // Animación de "dibujo" para todos los paths
+      const allPaths = Array.from(svg.querySelectorAll('path'));
+      allPaths.forEach(path => {
+        path.style.stroke = '#222';
+        path.style.strokeWidth = '2.5';
+        path.style.fillOpacity = '0';
+        const length = path.getTotalLength();
+        path.style.strokeDasharray = length;
+        path.style.strokeDashoffset = length;
+        path.style.transition = 'none';
       });
 
-      // Después de la animación de dibujo, mueve y agranda el SVG
-      const totalDuration = 1200 + (allPaths.length - 1) * 80 + 500;
+      // Forzar reflow y luego animar
       setTimeout(() => {
-        svg.classList.add('move-and-scale');
-        // Mostrar texto con efecto typing
-        setTimeout(() => {
-          showDedicationText();
-          // Mostrar petalos flotando
-          startFloatingObjects();
-          // Mostrar cuenta regresiva
-          showCountdown();
-          // Iniciar música de fondo
-          playBackgroundMusic();
-        }, 1200); //Tiempo para agrandar el SVG
-      }, totalDuration);
-    }, 50);
+        allPaths.forEach((path, i) => {
+          path.style.transition = `stroke-dashoffset 1.2s cubic-bezier(.77,0,.18,1) ${i * 0.08}s, fill-opacity 0.5s ${0.9 + i * 0.08}s`;
+          path.style.strokeDashoffset = 0;
+          setTimeout(() => {
+            path.style.fillOpacity = '1';
+            path.style.stroke = '';
+            path.style.strokeWidth = '';
+          }, 1200 + i * 80);
+        });
 
-    // Selecciona los corazones (formas rojas)
-    const heartPaths = allPaths.filter(el => {
-      const style = el.getAttribute('style') || '';
-      return style.includes('#FC6F58') || style.includes('#C1321F');
+        // Después de la animación de dibujo, mueve y agranda el SVG
+        const totalDuration = 1200 + (allPaths.length - 1) * 80 + 500;
+        setTimeout(() => {
+          svg.classList.add('move-and-scale');
+          // Mostrar texto con efecto typing
+          setTimeout(() => {
+            showDedicationText();
+            // Mostrar petalos flotando
+            startFloatingObjects();
+            // Mostrar cuenta regresiva
+            showCountdown();
+          }, 1200); //Tiempo para agrandar el SVG
+        }, totalDuration);
+      }, 50);
+
+      // Selecciona los corazones (formas rojas)
+      const heartPaths = allPaths.filter(el => {
+        const style = el.getAttribute('style') || '';
+        return style.includes('#FC6F58') || style.includes('#C1321F');
+      });
+      heartPaths.forEach(path => {
+        path.classList.add('animated-heart');
+      });
     });
-    heartPaths.forEach(path => {
-      path.classList.add('animated-heart');
-    });
-  });
+}
 
 // Efecto máquina de escribir para el texto de dedicatoria (seguidores)
 function getURLParam(name) {
@@ -161,6 +162,16 @@ function showCountdown() {
 }
 
 // --- Música de fondo ---
+// Permite elegir el archivo con ?musica=nombre.mp3
+function aplicarMusicaDeURL(audio) {
+  let musicaParam = getURLParam('musica');
+  if (!musicaParam) return;
+  // Decodifica y previene rutas maliciosas
+  musicaParam = decodeURIComponent(musicaParam).replace(/[^\w\d .\-]/g, '');
+  const nuevaSrc = 'Music/' + musicaParam;
+  if (!audio.src.endsWith(nuevaSrc)) audio.src = nuevaSrc;
+}
+
 function playBackgroundMusic() {
   const audio = document.getElementById('bg-music');
   if (!audio) return;
@@ -168,13 +179,7 @@ function playBackgroundMusic() {
   if (audio.dataset.init) return;
   audio.dataset.init = '1';
 
-  // --- Opción archivo local por parámetro 'musica' ---
-  let musicaParam = getURLParam('musica');
-  if (musicaParam) {
-    // Decodifica y previene rutas maliciosas
-    musicaParam = decodeURIComponent(musicaParam).replace(/[^\w\d .\-]/g, '');
-    audio.src = 'Music/' + musicaParam;
-  }
+  aplicarMusicaDeURL(audio);
 
   // --- Opción YouTube (solo mensaje de ayuda) ---
   let youtubeParam = getURLParam('youtube');
@@ -200,41 +205,19 @@ function playBackgroundMusic() {
     }
   }
 
-  let btn = document.getElementById('music-btn');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'music-btn';
-    btn.textContent = '🔊 Música';
-    btn.style.position = 'fixed';
-    btn.style.bottom = '18px';
-    btn.style.right = '18px';
-    btn.style.zIndex = 99;
-    btn.style.background = 'rgba(255,255,255,0.85)';
-    btn.style.border = 'none';
-    btn.style.borderRadius = '24px';
-    btn.style.padding = '10px 18px';
-    btn.style.fontSize = '1.1em';
-    btn.style.cursor = 'pointer';
-    document.body.appendChild(btn);
-  }
   audio.volume = 0.7;
   audio.loop = true;
 
   // Aviso si el archivo de audio no se puede cargar
   audio.addEventListener('error', () => {
     console.warn('No se pudo cargar el audio:', audio.currentSrc || audio.src);
-    btn.textContent = '⚠️ Música';
   });
 
   // Intentar reproducir inmediatamente
-  const intentarReproducir = () => audio.play().then(() => {
-    btn.textContent = '🔊 Música';
-    return true;
-  }).catch(() => {
+  const intentarReproducir = () => audio.play()
+    .then(() => true)
     // El navegador bloquea el autoplay hasta que el usuario interactúe
-    btn.textContent = '▶️ Música';
-    return false;
-  });
+    .catch(() => false);
 
   intentarReproducir().then(ok => {
     if (ok) return;
@@ -243,26 +226,48 @@ function playBackgroundMusic() {
     const quitarListeners = () => eventos.forEach(ev =>
       document.removeEventListener(ev, desbloquear));
     const desbloquear = () => {
-      audio.play().then(() => {
-        btn.textContent = '🔊 Música';
-        quitarListeners();
-      }).catch(() => {});
+      audio.play().then(quitarListeners).catch(() => {});
     };
     eventos.forEach(ev => document.addEventListener(ev, desbloquear));
   });
 
-  btn.onclick = () => {
-    if (audio.paused) {
-      audio.play();
-      btn.textContent = '🔊 Música';
-    } else {
-      audio.pause();
-      btn.textContent = '🔈 Música';
-    }
-  };
 }
 
-// Intentar reproducir la música lo antes posible (al cargar la página)
+// --- Arranque ---
+// Los navegadores bloquean el audio con sonido hasta que el usuario interactúa.
+// Se intenta reproducir apenas carga la página; si el navegador lo permite, la
+// portada desaparece sola y todo empieza solo. Si lo bloquea, el primer toque
+// sobre la portada inicia la música y la animación al mismo tiempo.
 window.addEventListener('DOMContentLoaded', () => {
-  playBackgroundMusic();
+  const portada = document.getElementById('intro-gate');
+  const audio = document.getElementById('bg-music');
+  let comenzado = false;
+
+  const comenzar = () => {
+    if (comenzado) return;
+    comenzado = true;
+    // play() va primero y de forma síncrona: iOS exige que la reproducción
+    // se pida dentro del mismo gesto del usuario.
+    playBackgroundMusic();
+    if (portada) {
+      portada.classList.add('oculto');
+      setTimeout(() => portada.remove(), 600);
+    }
+    cargarArbol();
+  };
+
+  if (portada) portada.addEventListener('click', comenzar);
+  document.addEventListener('keydown', comenzar, { once: true });
+
+  // Intento de autoplay: si el navegador lo permite, no hace falta tocar nada.
+  if (audio) {
+    audio.volume = 0.7;
+    aplicarMusicaDeURL(audio);
+    audio.play().then(() => {
+      // Suena: se sigue reproduciendo sin cortes y arranca todo lo demás.
+      comenzar();
+    }).catch(() => {
+      // Autoplay bloqueado: queda la portada esperando el primer toque.
+    });
+  }
 });
