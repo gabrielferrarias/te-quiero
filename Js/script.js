@@ -145,22 +145,15 @@ function startFloatingObjects() {
 function showCountdown() {
   const container = document.getElementById('countdown');
   let startParam = getURLParam('start');
-  let eventParam = getURLParam('event');
-  let startDate = startParam ? new Date(startParam + 'T00:00:00') : new Date('2024-08-03T00:00:00'); 
-  let eventDate = eventParam ? new Date(eventParam + 'T00:00:00') : new Date('2025-08-03T00:00:00');
+  let startDate = startParam ? new Date(startParam + 'T00:00:00') : new Date('2026-06-12T18:25:00');
 
   function update() {
     const now = new Date();
     let diff = now - startDate;
     let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    let eventDiff = eventDate - now;
-    let eventDays = Math.max(0, Math.floor(eventDiff / (1000 * 60 * 60 * 24)));
-    let eventHours = Math.max(0, Math.floor((eventDiff / (1000 * 60 * 60)) % 24));
-    let eventMinutes = Math.max(0, Math.floor((eventDiff / (1000 * 60)) % 60));
-    let eventSeconds = Math.max(0, Math.floor((eventDiff / 1000) % 60));
 
     container.innerHTML =
-      `Ya pasaron <b>${days}</b> y sigo eligiendo compartir mi tiempo contigo <br>`;
+      `Ya pasaron <b>${days}</b> de nuestra primer merienda y sigo eligiendo compartir mi tiempo contigo <br>`;
     container.classList.add('visible');
   }
   update();
