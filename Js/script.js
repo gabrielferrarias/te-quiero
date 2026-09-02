@@ -164,6 +164,9 @@ function showCountdown() {
 function playBackgroundMusic() {
   const audio = document.getElementById('bg-music');
   if (!audio) return;
+  // Esta función se llama al cargar y otra vez tras la animación: inicializar solo una vez
+  if (audio.dataset.init) return;
+  audio.dataset.init = '1';
 
   // --- Opción archivo local por parámetro 'musica' ---
   let musicaParam = getURLParam('musica');
@@ -216,13 +219,38 @@ function playBackgroundMusic() {
   }
   audio.volume = 0.7;
   audio.loop = true;
-  // Intentar reproducir inmediatamente
-  audio.play().then(() => {
-    btn.textContent = '🔊 Música';
-  }).catch(() => {
-    // Si falla el autoplay, esperar click en el botón
-    btn.textContent = '▶️ Música';
+
+  // Aviso si el archivo de audio no se puede cargar
+  audio.addEventListener('error', () => {
+    console.warn('No se pudo cargar el audio:', audio.currentSrc || audio.src);
+    btn.textContent = '⚠️ Música';
   });
+
+  // Intentar reproducir inmediatamente
+  const intentarReproducir = () => audio.play().then(() => {
+    btn.textContent = '🔊 Música';
+    return true;
+  }).catch(() => {
+    // El navegador bloquea el autoplay hasta que el usuario interactúe
+    btn.textContent = '▶️ Música';
+    return false;
+  });
+
+  intentarReproducir().then(ok => {
+    if (ok) return;
+    // Reintentar con el primer gesto del usuario (click, toque o tecla)
+    const eventos = ['pointerdown', 'touchstart', 'keydown'];
+    const quitarListeners = () => eventos.forEach(ev =>
+      document.removeEventListener(ev, desbloquear));
+    const desbloquear = () => {
+      audio.play().then(() => {
+        btn.textContent = '🔊 Música';
+        quitarListeners();
+      }).catch(() => {});
+    };
+    eventos.forEach(ev => document.addEventListener(ev, desbloquear));
+  });
+
   btn.onclick = () => {
     if (audio.paused) {
       audio.play();
