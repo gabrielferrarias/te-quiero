@@ -26,9 +26,8 @@ body {
 
 .tree-container svg.move-and-scale {
   transition: transform 1.2s cubic-bezier(.77,0,.18,1);
-  /* Mueve hacia abajo en caso de los celualares, para que la copa del
-     arbol no quede tapada por el cartel de la dedicatoria */
-  transform: translateY(85px) scale(1.18);
+  /* Mueve hacia abajo en caso de los celualares */
+  transform: translateY(60px) scale(1.18);
 }
 
 .dedication-text {
@@ -80,7 +79,7 @@ body {
 .countdown {
   position: fixed;
   left: 50%;
-  bottom: 4vw;
+  bottom: 10vw;
   transform: translateX(-50%);
   font-size: 0.98rem;
   min-width: 60vw;
