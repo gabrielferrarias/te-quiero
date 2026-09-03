@@ -233,6 +233,27 @@ function playBackgroundMusic() {
 
 }
 
+// --- Pista de desplazamiento hacia el mapa ---
+function mostrarPistaDeScroll() {
+  const pista = document.getElementById('scroll-hint');
+  const mapa = document.getElementById('pantalla-mapa');
+  if (!pista || !mapa) return;
+
+  // Aparece una vez terminada la animacion del arbol
+  setTimeout(() => pista.classList.add('visible'), 6000);
+
+  pista.addEventListener('click', () => mapa.scrollIntoView({ behavior: 'smooth' }));
+
+  // Se esconde apenas se empieza a desplazar
+  const alDesplazar = () => {
+    if (window.scrollY > 40) {
+      pista.classList.remove('visible');
+      window.removeEventListener('scroll', alDesplazar);
+    }
+  };
+  window.addEventListener('scroll', alDesplazar, { passive: true });
+}
+
 // --- Arranque ---
 // Los navegadores bloquean el audio con sonido hasta que el usuario interactúa.
 // Se intenta reproducir apenas carga la página; si el navegador lo permite, la
@@ -253,7 +274,10 @@ window.addEventListener('DOMContentLoaded', () => {
       portada.classList.add('oculto');
       setTimeout(() => portada.remove(), 600);
     }
+    // Recien ahora se habilita el desplazamiento hacia el mapa
+    document.body.classList.remove('sin-scroll');
     cargarArbol();
+    mostrarPistaDeScroll();
   };
 
   if (portada) portada.addEventListener('click', comenzar);

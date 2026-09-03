@@ -69,20 +69,126 @@
         60% { transform: scale(1.08); }
         80% { transform: scale(1); }
       }
+
+      /* --- Pagina desplazable: la experiencia arriba, el mapa abajo --- */
+      body {
+        height: auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+      }
+      /* Sin scroll mientras la portada esta puesta */
+      body.sin-scroll { height: 100vh; overflow: hidden; }
+
+      .pantalla {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+
+      /* Estos dos eran fixed: pasarlos a absolute los deja dentro de la
+         primera pantalla en vez de flotando sobre el mapa al desplazar. */
+      #floating-objects { position: absolute; width: 100%; height: 100%; }
+      .countdown { position: absolute; }
+
+      /* Indicador de que hay mas abajo */
+      .scroll-hint {
+        position: absolute;
+        left: 50%;
+        bottom: 2px;
+        transform: translateX(-50%);
+        z-index: 7;
+        color: #e60026;
+        font-size: 15px;
+        line-height: 1;
+        opacity: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        transition: opacity 0.8s;
+        animation: rebote 1.8s infinite;
+      }
+      .scroll-hint.visible { opacity: 0.75; }
+      @keyframes rebote {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50%      { transform: translateX(-50%) translateY(-5px); }
+      }
+
+      /* --- Seccion del mapa --- */
+      #pantalla-mapa {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 32px 16px 40px;
+        box-sizing: border-box;
+        background: #fcfcfc;
+      }
+      #pantalla-mapa h2 {
+        margin: 0;
+        font-family: 'Dancing Script', 'Pacifico', cursive, sans-serif;
+        font-size: 2.4rem;
+        font-weight: normal;
+        color: #e60026;
+        text-align: center;
+      }
+      #pantalla-mapa .bajada {
+        margin: -8px 0 0;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 1rem;
+        color: #555;
+        text-align: center;
+        max-width: 32em;
+      }
+      .mapa-marco {
+        width: min(900px, 100%);
+        aspect-ratio: 4 / 3;
+        max-height: 62vh;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px #e6002622;
+        background: #f1efe9;
+      }
+      .mapa-marco iframe { width: 100%; height: 100%; border: 0; display: block; }
+      @media (max-width: 600px) {
+        #pantalla-mapa h2 { font-size: 1.9rem; }
+        #pantalla-mapa .bajada { font-size: 0.92rem; }
+        .mapa-marco { aspect-ratio: 3 / 4; max-height: 70vh; }
+      }
     </style>
 </head>
-<body>
+<body class="sin-scroll">
     <button id="intro-gate" type="button" aria-label="Comenzar">
       <span class="corazon">❤️</span>
       <span class="texto">Toca para comenzar</span>
       <span class="sub">con sonido 🔊</span>
     </button>
-    <div id="floating-objects"></div>
-    <div class="dedication-text" id="dedication-text">
-      <div class="signature" id="signature"></div>
-    </div>
-    <div class="countdown" id="countdown"></div>
-    <div class="tree-container" id="tree-container"></div>
+    <section class="pantalla" id="pantalla-inicio">
+      <div id="floating-objects"></div>
+      <div class="dedication-text" id="dedication-text">
+        <div class="signature" id="signature"></div>
+      </div>
+      <div class="countdown" id="countdown"></div>
+      <div class="tree-container" id="tree-container"></div>
+      <button class="scroll-hint" id="scroll-hint" type="button" aria-label="Ver nuestros lugares">&#9662;</button>
+    </section>
+
+    <section class="pantalla" id="pantalla-mapa">
+      <h2>Nuestros lugares</h2>
+      <p class="bajada">Los puntos del mapa donde pasaron nuestras primeras veces.</p>
+      <div class="mapa-marco">
+        <iframe
+          src="https://www.google.com/maps/d/embed?mid=1Cy-Oq03718_LmdcjHLl8DH1yr6FH04k&amp;ehbc=2E312F"
+          title="Nuestros lugares"
+          loading="lazy"
+          allowfullscreen></iframe>
+      </div>
+    </section>
+
     <audio src="Music/music1.mp3" id="bg-music" preload="auto" loop></audio>
     <script src="Js/script.js"></script>
 </body>
