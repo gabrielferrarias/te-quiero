@@ -154,7 +154,7 @@ function showCountdown() {
     let days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
     container.innerHTML =
-      `Ya pasaron <b>${days}</b> días de nuestra primer merienda y sigo eligiendo compartir mi tiempo contigo <br>`;
+      `Ya pasaron <b>${days}</b> días de nuestra primer merienda y me gustaría seguir compartiendo mi tiempo contigo <br>`;
     container.classList.add('visible');
   }
   update();
